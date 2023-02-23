@@ -82,7 +82,8 @@ async def on_message(ctx):
         await ctx.reply(f'{round(bot.latency*1000)}(ms)')
 
       elif x1 == 'version': #查目前版本
-        await ctx.reply('目前版本 1.02')
+        ver = ('目前版本 1.04' + '\n' +'增加功能：查單曲R值')
+        await ctx.reply(ver)
 
       elif x1 == 'luck': #測運氣
         rl = choice(luck) 
@@ -105,12 +106,56 @@ async def on_message(ctx):
           lst.pop(1)
           lst.pop(0)
           if lst[0] == lst[1]:
-            await ctx.reply('為什麼讓我在兩個同樣的選項選一個出來 是不是有病')
+            await ctx.reply('為什麼讓我在同樣的選項裡選一個出來 是不是有病')
           else:
             rc = choice(lst)
             await ctx.reply(rc)
         else:
           await ctx.reply("這麼少選項我要選什麼")
+
+      elif x1 == 'cal': #計算指令
+        if x > 2:
+          x2 = str(lst[2])
+          if x2 == 'rank': #算單曲r值
+            if x == 5:
+              x3 = float(lst[3])
+              x4 = float(lst[4])
+              x3x4 = x3*(x4)
+              if x3 >= 100.5:
+                rank = 100.5*x4*22.4*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 100.5 and x3 >= 100:
+                rank = x3x4*21.6*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 100 and x3 >= 99.5: 
+                rank = x3x4*21.1*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 99.5 and x3 >= 99: 
+                rank = x3x4*20.8*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 99 and x3 >= 98:
+                rank = x3x4*20.3*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 98 and x3 >= 97:
+                rank = x3x4*20*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 97 and x3 >= 94:
+                rank = x3x4*16.8*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 94 and x3 >= 90:
+                rank = x3x4*15.2*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              elif x3 < 80 and x3 >= 90:
+                rank = x3x4*13.6*0.01
+                await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
+              else:
+                await ctx.reply('分數太低了！廢物！')
+            else:
+              await ctx.reply('無法計算 你行你上')
+          else:
+            await ctx.reply('你要算什麼')
+        else:
+          await ctx.reply('你要算什麼')
 
           
       else:
