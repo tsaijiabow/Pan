@@ -45,6 +45,14 @@ rmsg = [
     ,'答錯了'
     ,'嗯嗯嗯嗯是是是你說的都對'
     ,'有時間在這裡講幹話還不如去打手槍'] #30個隨機回答
+luck = [
+       '大吉 去買個樂透看看'
+      ,'中吉 可能會有意料外的小驚喜'
+      ,'小吉 今天非常適合刷分 ~~不是曉極~~'
+      ,'普通 就跟平常一樣 普通的一天'
+      ,'小凶 感覺會有點不太順利'
+      ,'大凶 唉沒救了 準備等死吧'
+]
 
 @bot.event
 async def on_ready():
@@ -72,6 +80,13 @@ async def on_message(ctx):
       x1 = str(lst[1]) #第1層 基本指令
       if x1 == 'ping': #測延遲
         await ctx.reply(f'{round(bot.latency*1000)}(ms)')
+
+      elif x1 == 'version': #查目前版本
+        await ctx.reply('目前版本 1.02')
+
+      elif x1 == 'luck': #測運氣
+        rl = choice(luck) 
+        await ctx.reply(rl)
 
       elif x1 == 'random': #隨機數字
         if x == 4: #判斷是否為兩個選項
