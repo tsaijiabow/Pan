@@ -63,9 +63,8 @@ async def on_message(ctx):
     user = ctx.author.name #傳訊息的人
     x = len(lst)
     
-    print (user)
-    print (msg)
-    print(x) #後台接收所有訊息
+    print (user +' ' + str(x))
+    print (msg) #後台接收所有訊息
 
     x0 = str(lst[0])
     if x0 == 'P' or x0 == 'pan': #第0層 判斷是否在呼叫機器人
