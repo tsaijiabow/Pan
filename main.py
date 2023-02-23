@@ -82,7 +82,7 @@ async def on_message(ctx):
         await ctx.reply(f'{round(bot.latency*1000)}(ms)')
 
       elif x1 == 'version': #查目前版本
-        ver = ('目前版本 1.04' + '\n' +'增加功能：查單曲R值')
+        ver = ('目前版本 1.05\n增加功能：查單曲R值\n新增回覆：恭喜'+user+'突破理論值 海放眾人！')
         await ctx.reply(ver)
 
       elif x1 == 'luck': #測運氣
@@ -121,7 +121,9 @@ async def on_message(ctx):
               x3 = float(lst[3])
               x4 = float(lst[4])
               x3x4 = x3*(x4)
-              if x3 >= 100.5:
+              if x3 >101:
+                await ctx.reply('哇！恭喜 '+user+' 突破理論值 海放眾人！')
+              elif x3 <= 101 and x3 >= 100.5:
                 rank = 100.5*x4*22.4*0.01
                 await ctx.reply('定數 '+str(x4)+' 的譜面打到 '+str(x3)+'% 的R值是 '+ str(rank))
               elif x3 < 100.5 and x3 >= 100:
