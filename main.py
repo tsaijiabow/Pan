@@ -1,5 +1,4 @@
 import discord
-import os
 import json
 import keep_alive
 from datetime import datetime
@@ -26,7 +25,7 @@ async def on_ready():
   activity_w = discord.Activity(type=discord.ActivityType.playing,name="我的主人很懶...")
   await bot.change_presence(status=status_w, activity=activity_w)
   
-ver = ('目前版本 1.10.02\n大更新！初步加入金錢系統')
+ver = ('目前版本 1.11.06\n重大更新！賭博系統完工！')
 
 @bot.event
 async def on_message(ctx):
@@ -150,7 +149,9 @@ async def on_message(ctx):
           with open('data.json', 'w', encoding='utf-8') as dj:
             data[user] = 1000
             json.dump(data ,dj ,ensure_ascii=False)
+            dj.close()
             await ctx.reply('用戶名稱：'+user+'\n註冊成功！獲得$1000')
+            
         else:            
           await ctx.reply('用戶名稱：'+user+'\n已註冊')
 
@@ -174,7 +175,61 @@ async def on_message(ctx):
             money = data[user]
             data[user] = money + get
             json.dump(data ,dj ,ensure_ascii=False)
-          await ctx.reply(user+'做為廉價勞工賺取了$'+ str(get))
+            dj.close()
+          await ctx.reply(user+' 作為廉價勞工賺取了$'+ str(get))
+
+      elif x1 == 'bet': #賭大小
+        with open('data.json', 'r', encoding='utf-8') as dj:
+          data = json.load(dj)
+        if data.get(user,'a') == 'a':
+          await ctx.reply('新用戶請先使用register指令註冊')
+        else:
+          if x != 4: #判斷指令格式是否正確
+            await ctx.reply('格式不對\n請輸入 大/小 及 金額')
+          else:
+            bigbool = randint(0,1)
+            money = data[user]
+            x2 = str(lst[2])
+            x3 = str(lst[3])
+            lst.pop(1)
+            lst.pop(0)
+            if x3.isdecimal():
+              if x2 == 'big' or x2 == '大':
+                if money >= int(x3):
+                  if bigbool == 1:
+                    data[user] = money + int(x3)
+                    with open('data.json', 'w', encoding='utf-8') as dj:
+                      json.dump(data ,dj ,ensure_ascii=False)
+                      dj.close()
+                    await ctx.reply('本局結果：大\n'+user+' 贏得了 $'+str(x3))
+                  elif bigbool == 0:
+                    data[user] = money - int(x3)
+                    with open('data.json', 'w', encoding='utf-8') as dj:
+                      json.dump(data ,dj ,ensure_ascii=False)
+                      dj.close()
+                    await ctx.reply('本局結果：小\n'+user+' 輸掉了 $'+str(x3))
+                else:
+                  await ctx.reply('你的錢不夠讓你賭這麼大')
+              elif x2 == 'small' or x2 == '小':
+                if money >= int(x3):
+                  if bigbool == 1:
+                    data[user] = money - int(x3)
+                    with open('data.json', 'w', encoding='utf-8') as dj:
+                      json.dump(data ,dj ,ensure_ascii=False)
+                      dj.close()
+                    await ctx.reply('本局結果：大\n'+user+' 輸掉了 $'+str(x3))
+                  elif bigbool == 0:
+                    data[user] = money + x3
+                    with open('data.json', 'w', encoding='utf-8') as dj:
+                      json.dump(data ,dj ,ensure_ascii=False)
+                      dj.close()
+                    await ctx.reply('本局結果：小\n'+user+'輸掉了 $'+str(x3))
+                else:
+                  await ctx.reply('你的錢不夠讓你賭這麼大')
+              else:
+                await ctx.reply('格式不對\n請輸入 大/小 及 金額')
+            else:
+              await ctx.reply('格式不對\n請輸入 大/小 及 金額')
         
       else:
         rm = randint(1,30) #隨機抽一條回覆
