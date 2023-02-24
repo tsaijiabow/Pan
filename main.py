@@ -10,19 +10,23 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='=“', intents=intents)
+bot = commands.Bot(command_prefix='=', intents=intents)
 
 with open('setting.json', 'r', encoding='utf-8') as st:
   setjson = json.load(st)
 with open('reply.json', 'r', encoding='utf-8') as rp:
   rmsg = json.load(rp)
-
+with open('data.json', 'r' ,encoding='utf-8') as dj:
+  data = json.load(dj)
+  
 @bot.event
 async def on_ready():
   print("Pan#6699 已登入")
   status_w = discord.Status.online
   activity_w = discord.Activity(type=discord.ActivityType.playing,name="我的主人很懶...")
   await bot.change_presence(status=status_w, activity=activity_w)
+  
+ver = ('目前版本 1.10.02\n大更新！初步加入金錢系統')
 
 @bot.event
 async def on_message(ctx):
@@ -44,8 +48,16 @@ async def on_message(ctx):
       if x1 == 'ping': #測延遲
         await ctx.reply(f'{round(bot.latency*1000)}(ms)')
 
+      elif x1 == 'say':
+        lst.pop(1)
+        lst.pop(0)
+        say = str(lst[0])
+        if x > 3:
+          say = (' ').join(lst)
+        await ctx.delete()
+        await ctx.channel.send(user +'說：' + say)
+
       elif x1 == 'version': #查目前版本
-        ver = ('目前版本 1.07\n本次改動：縮短部分程式碼')
         await ctx.reply(ver)
 
       elif x1 == 'luck': #抽籤
@@ -83,7 +95,7 @@ async def on_message(ctx):
             if x == 5:
               x3 = float(lst[3])
               x4 = float(lst[4])
-              x3x4 = x3*(x4)
+              x3x4 = x3*x4
               if x3 >101:
                 await ctx.reply('哇！恭喜 '+user+' 突破理論值 海放眾人！')
               elif x3 <= 101 and x3 >= 100.5:
@@ -131,7 +143,39 @@ async def on_message(ctx):
         else:
           await ctx.reply('你要算什麼')
 
-          
+      elif x1 == 'register': #新用戶登記
+        with open('data.json', 'r', encoding='utf-8') as dj:
+          data = json.load(dj)
+        if data.get(user,'a') == 'a': #偵測是否為新用戶
+          with open('data.json', 'w', encoding='utf-8') as dj:
+            data[user] = 1000
+            json.dump(data ,dj ,ensure_ascii=False)
+            await ctx.reply('用戶名稱：'+user+'\n註冊成功！獲得$1000')
+        else:            
+          await ctx.reply('用戶名稱：'+user+'\n已註冊')
+
+      elif x1 == 'me':
+        with open('data.json', 'r', encoding='utf-8') as dj:
+          data = json.load(dj)
+        if data.get(user,'a') == 'a':
+          await ctx.reply('新用戶請先使用register指令註冊')
+        else:
+          money = data[user]
+          await ctx.reply(user+' 目前資產是 $'+ str(money))
+
+      elif x1 == 'get':
+        with open('data.json', 'r', encoding='utf-8') as dj:
+          data = json.load(dj)
+        if data.get(user,'a') == 'a':
+          await ctx.reply('新用戶請先使用register指令註冊')
+        else:
+          get = randint(1,100)
+          with open('data.json', 'w', encoding='utf-8') as dj:
+            money = data[user]
+            data[user] = money + get
+            json.dump(data ,dj ,ensure_ascii=False)
+          await ctx.reply(user+'做為廉價勞工賺取了$'+ str(get))
+        
       else:
         rm = randint(1,30) #隨機抽一條回覆
         await ctx.reply(rmsg[str(rm)])
