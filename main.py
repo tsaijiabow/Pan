@@ -26,7 +26,7 @@ async def on_ready():
   await bot.change_presence(status=status_w, activity=activity_w)
 
 err = ('語法錯誤')
-ver = ('目前版本 1.12.03\n加入功能列表')
+ver = ('目前版本 1.16.02\n新增加減乘除功能')
 
 @bot.event
 async def on_message(ctx):
@@ -36,10 +36,10 @@ async def on_message(ctx):
     msg = str(ctx.content) #訊息內容
     lst = msg.rsplit() #訊息長度(以空格做分隔)
     user = ctx.author.name #傳訊息的人
+    userid = str(ctx.author.id)
     x = len(lst)
     
-    print (user +' ' + str(x))
-    print (msg) #後台接收所有訊息
+    print (user+'\n'+str(userid)+' '+ str(x)+'\n'+msg) #後台接收所有訊息
 
     x0 = str(lst[0])
     if x0 == 'P' or x0 == 'Pan' or x0 == 'pan': #第0層 判斷是否在呼叫機器人
@@ -51,15 +51,18 @@ async def on_message(ctx):
       elif x1 == 'help':
         embed = discord.Embed(title="功能列表", color=0x969632)
         embed.set_thumbnail(url= "https://static.wikia.nocookie.net/maimai/images/0/03/201905104_mms_pandoraparadoxxx.png/revision/latest?cb=20190524085927&path-prefix=zh")
-        embed.add_field(name="選擇", value="P choose+兩個或多個選項", inline=True)
-        embed.add_field(name="抽籤", value="P luck", inline=True)
-        embed.add_field(name="隨機數字", value="P random+兩個整數", inline=True)
-        embed.add_field(name="算單曲R值", value="P cal rank+分數+定數", inline=True)
-        embed.add_field(name="賭博系統 註冊", value="P register", inline=True)
-        embed.add_field(name="查自己資產", value="P me", inline=True)
-        embed.add_field(name="下注", value="P bet+金額+大or小", inline=True)
-        embed.add_field(name="工作賺錢", value="P get", inline=True)
-        embed.add_field(name="其他隨機的回答", value="P+任意文字", inline=True)
+        embed.add_field(name="選擇", value="P choose+兩個或多個選項", inline=False)
+        embed.add_field(name="抽籤", value="P luck", inline=False)
+        embed.add_field(name="隨機數字", value="P random+兩個整數", inline=False)
+        embed.add_field(name="算單曲R值", value="P cal rank+分數+定數", inline=False)
+        embed.add_field(name="賭博系統 註冊", value="P register", inline=False)
+        embed.add_field(name="刪除資料", value="P delete", inline=False)
+        embed.add_field(name="查資產", value="P me", inline=False)
+        embed.add_field(name="查排行榜", value="P ranking", inline=False)
+        embed.add_field(name="下注", value="P bet+金額+大or小", inline=False)
+        embed.add_field(name="工作賺錢", value="P get", inline=False)
+        embed.add_field(name="轉帳", value="P transfer+金額+人名", inline=False)
+        embed.add_field(name="其他隨機的回答", value="P+任意文字", inline=False)
         embed.set_footer(text="目前還在測試階段 有bug請多見諒")
         await ctx.channel.send(embed=embed)
 
@@ -115,7 +118,66 @@ async def on_message(ctx):
       elif x1 == 'cal': #計算指令
         if x > 2:
           x2 = str(lst[2])
-          if x2 == 'rank': #算單曲r值
+          if x2 == '+': #加法
+            if x >= 5:
+              try:
+                lst.pop(2)
+                lst.pop(1)
+                lst.pop(0)
+                l = int(len(lst))
+                c = 0
+                for i in range(l):
+                  c = float(c) + float(lst[i])
+                await ctx.reply(str(c))
+              except Exception:
+                await ctx.reply('給我兩個數字')
+            else:  
+              await ctx.reply('給我兩個數字')
+          elif x2 == '-': #減法
+            if x == 5:
+              try:
+                lst.pop(2)
+                lst.pop(1)
+                lst.pop(0)
+                c = float(lst[0]) - float(lst[1])
+                await ctx.reply(str(c))
+              except Exception:
+                await ctx.reply('給我兩個數字')
+            else:  
+              await ctx.reply('給我兩個數字')
+
+          elif x2 == '*' or x2 == '×': #乘法
+            if x >= 5:
+              try:
+                lst.pop(2)
+                lst.pop(1)
+                lst.pop(0)
+                l = int(len(lst))
+                c = 1
+                for i in range(l):
+                  c = float(c) * float(lst[i])
+                c = round(c,10)
+                await ctx.reply(str(c))
+              except Exception:
+                await ctx.reply('給我兩個數字')
+            else:  
+              await ctx.reply('給我兩個數字')
+
+          elif x2 == '/' or x2 == '÷': #除法
+            if x == 5:
+              try:
+                lst.pop(2)
+                lst.pop(1)
+                lst.pop(0)
+                c = float(lst[0]) / float(lst[1])
+                c = round(c,10)
+                await ctx.reply(str(c))
+              except Exception:
+                await ctx.reply('給我兩個數字')
+            else:  
+              await ctx.reply('給我兩個數字')
+              
+          elif x2 == 'rank': #算單曲r值
             if x == 5:
               x3 = float(lst[3])
               x4 = float(lst[4])
@@ -170,93 +232,169 @@ async def on_message(ctx):
       elif x1 == 'register': #新用戶登記
         with open('data.json', 'r', encoding='utf-8') as dj:
           data = json.load(dj)
-        if data.get(user,'a') == 'a': #偵測是否為新用戶
+        with open('name.json', 'r', encoding='utf-8') as nj:
+          name = json.load(nj)
+        if data.get(userid,'a') == 'a': #偵測是否為新用戶
           with open('data.json', 'w', encoding='utf-8') as dj:
-            data[user] = 1000
+            data[userid] = 1000
             json.dump(data ,dj ,ensure_ascii=False)
             dj.close()
-            await ctx.reply('用戶名稱：'+user+'\n註冊成功！獲得$1000')
-            
-        else:            
-          await ctx.reply('用戶名稱：'+user+'\n已註冊')
+          if name.get(userid,'a') == 'a':
+            with open('name.json', 'w', encoding='utf-8') as nj:
+              name[userid] = user
+              json.dump(name ,nj ,ensure_ascii=False)
+              nj.close()
+          await ctx.reply('用戶名稱：<@'+userid+'>\n註冊成功！')
+        else:
+          await ctx.reply('用戶名稱：<@'+userid+'>\n已註冊')
 
-      elif x1 == 'me': #查自己資產
+      elif x1 == 'me': #查資產
         with open('data.json', 'r', encoding='utf-8') as dj:
           data = json.load(dj)
-        if data.get(user,'a') == 'a':
+        if data.get(userid,'a') == 'a':
           await ctx.reply('新用戶請先使用register指令註冊')
+        elif x > 2:
+          x2 = str(lst[2]).strip('@<>')
+          if data.get(x2, 'a') == 'a':
+            await ctx.reply('沒有此註冊資料')
+          else:
+            money = data[x2]
+            l = len(str(money))
+            await ctx.reply('<@'+x2+'> 目前資產是 $'+ str(money)+'\n'+ str(l) +'位數')
         else:
-          money = data[user]
-          await ctx.reply(user+' 目前資產是 $'+ str(money))
+          money = data[userid]
+          l = len(str(money))
+          await ctx.reply('<@'+userid+'> 目前資產是 $'+ str(money)+'\n'+ str(l) +'位數')
 
+      elif x1 == 'delete': #刪除資料
+        with open('data.json', 'r', encoding='utf-8') as dj:
+          data = json.load(dj)
+        with open('name.json', 'r', encoding='utf-8') as nj:
+          name = json.load(nj)
+          if data.get(userid,'a') == name.get(userid,'a') == 'a':
+            await ctx.reply('沒有此註冊資料')
+          else:
+            with open('data.json', 'w', encoding='utf-8') as dj:
+              p = data.pop(userid,'a')
+              json.dump(data ,dj ,ensure_ascii=False)
+              dj.close()
+            with open('name.json', 'r', encoding='utf-8') as nj:
+              name = json.load(nj)
+              with open('name.json', 'w', encoding='utf-8') as nj:
+                p = name.pop(userid,'a')
+                json.dump(name ,nj ,ensure_ascii=False)
+                nj.close()
+            await ctx.reply('資料刪除成功')
+
+      elif x1 == 'ranking': #排行榜
+        with open('data.json', 'r', encoding='utf-8') as dj:
+          data = json.load(dj)
+        with open('name.json', 'r', encoding='utf-8') as nj:
+          name = json.load(nj)
+          v = list(data.values())
+          k = list(data.keys())
+          d = dict(zip(v, k))
+          s = sorted(v,reverse=True)
+          embed = discord.Embed(title="資產排行榜", color=0x969632)
+          if len(k) < 10:
+            n = len(k)
+            for i in range(n):         
+              embed.add_field(name='第'+str(i+1)+'名：'+str(name[d[s[i]]]), value='$'+str(s[i]), inline=False)
+          else:
+            n = 10
+            for i in range(n):         
+              embed.add_field(name='第'+str(i+1)+'名：'+str(name[d[s[i]]]), value='$'+str(s[i]), inline=False)
+          await ctx.channel.send(embed=embed)
+      
       elif x1 == 'get': #工作
         with open('data.json', 'r', encoding='utf-8') as dj:
           data = json.load(dj)
-        if data.get(user,'a') == 'a':
+        if data.get(userid,'a') == 'a':
           await ctx.reply('新用戶請先使用register指令註冊')
         else:
           with open('data.json', 'w', encoding='utf-8') as dj:
-            money = data[user]
+            money = data[userid]
             if money < 0:
-              data[user] = 0
+              data[userid] = 0
               json.dump(data ,dj ,ensure_ascii=False)          
-              await ctx.reply('原資產為負數 已歸零\n目前資產： $'+str(data[user]))
+              await ctx.reply('原資產為負數 已歸零\n目前資產： $'+str(data[userid]))
             elif money == 0:
-              data[user] = money + 100 
+              data[userid] = money + 100 
               json.dump(data ,dj ,ensure_ascii=False)
-              await ctx.reply('哇！一百塊從天上掉下來了！\n請務必振作起來\n目前資產： $'+str(data[user]))
+              await ctx.reply('哇！一百塊從天上掉下來了！\n請務必振作起來\n目前資產： $'+str(data[userid]))
             elif money < 5000 and money >= 100:
               g = randint(1,100)
-              data[user] = money + g
+              data[userid] = money + g
               json.dump(data ,dj ,ensure_ascii=False)
-              await ctx.reply(user+' 以廉價苦力勞工的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[user]))
+              await ctx.reply('<@'+userid+'> 以廉價苦力勞工的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[userid]))
             elif money < 500000 and money >= 5000:
               g = randint(1,10000)
-              data[user] = money + g
+              data[userid] = money + g
               json.dump(data ,dj ,ensure_ascii=False)
-              await ctx.reply(user+' 以一般員工的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[user]))
+              await ctx.reply('<@'+userid+'> 以一般員工的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[userid]))
             elif money < 100000000 and money >= 500000:
               g = randint(1,5000000)
-              data[user] = money + g
+              data[userid] = money + g
               json.dump(data ,dj ,ensure_ascii=False)
-              await ctx.reply(user+' 以高薪員工的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[user]))
+              await ctx.reply('<@'+userid+'> 以高薪員工的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[userid]))
             elif money < 100000000000 and money >= 100000000:
               g = randint(1,100000000)
-              data[user] = money + g
+              data[userid] = money + g
               json.dump(data ,dj ,ensure_ascii=False)
-              await ctx.reply(user+' 以老闆的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[user]))
+              await ctx.reply('<@'+userid+'> 以老闆的身分賺取了 $'+str(g)+'\n目前資產： $'+str(data[userid]))
             elif money >= 10000000000:
               json.dump(data ,dj ,ensure_ascii=False)
-              await ctx.reply('你已經財富自由了！還賺什麼！\n目前資產： $'+str(data[user]))
+              await ctx.reply('你已經財富自由了！還賺什麼！\n目前資產： $'+str(data[userid]))
             dj.close() #關閉檔案
           
       elif x1 == '測試':
         with open('data.json', 'r', encoding='utf-8') as dj:
           data = json.load(dj)
-        embed=discord.Embed(title="測試", color=0x969632)        
-        embed.set_thumbnail(url="https://static.wikia.nocookie.net/maimai/images/0/03/201905104_mms_pandoraparadoxxx.png/revision/latest?cb=20190524085927&path-prefix=zh")
-        embed.add_field(name="測試", value="測試", inline=True)
-        embed.add_field(name="測試", value="測試", inline=True)
-        embed.add_field(name="測試", value="測試", inline=False)
-        embed.add_field(name="測試", value="測試", inline=True)
-        embed.set_footer(text="你媽媽表現此次你媽媽表現此次你媽媽表現此次你媽媽表現此次你媽媽表現此次你媽媽表現此次你媽媽表現此次你媽媽表現此次你媽媽表現此次")
-        await ctx.channel.send(embed=embed)
-        d = str(data).strip('{}')
-        dr = d.rsplit(',')
-        for i in range(len(dr)):
-         await ctx.channel.send(dr[i])
+          await ctx.channel.send('暫時沒有能測試的東西')
+
+      elif x1 == 'transfer': #轉帳
+        with open('data.json', 'r', encoding='utf-8') as dj:
+          data = json.load(dj)
+        if data.get(userid,'a') == 'a':
+          await ctx.reply('新用戶請先使用register指令註冊')
+        else:
+          if x != 4: #判斷指令格式是否正確
+            await ctx.reply('格式不對\n請輸入人金額 + 人名')
+          else:
+            x2 = str(lst[2])
+            x3 = str(lst[3]).strip('@<>')
+            if data.get(x3, 'a') == 'a':
+              await ctx.reply('沒有此註冊資料')
+            else:
+              try:
+                money = data[userid]
+                tran = data[x3]
+                jiabow = data["821894064194453554"]
+                c = round(int(x2)/101)
+                if money >= (int(x2)+c) and int(x2) > 0:
+                  data[userid] = money - int(x2)
+                  data[x3] = tran + (100 * c)
+                  data["821894064194453554"] = jiabow + c
+                  with open('data.json', 'w', encoding='utf-8') as dj:
+                    json.dump(data ,dj ,ensure_ascii=False)
+                    dj.close()
+                  await ctx.reply('轉帳成功！<@'+x3+'>收到了 $'+ str(100 * c)+ '\n<@821894064194453554>收到了1%手續費 $'+ str(c)+'\n目前資產： $'+ str(data[userid]))
+                else:
+                  await ctx.reply('你不能轉這個金額')
+              except Exception:
+                await ctx.reply(err)
       
       elif x1 == 'bet': #賭大小
         with open('data.json', 'r', encoding='utf-8') as dj:
           data = json.load(dj)
-        if data.get(user,'a') == 'a':
+        if data.get(userid,'a') == 'a':
           await ctx.reply('新用戶請先使用register指令註冊')
         else:
           if x != 4: #判斷指令格式是否正確
             await ctx.reply('格式不對\n請輸入金額 + 大/小')
           else:
             bigbool = randint(0,1)
-            money = data[user]
+            money = data[userid]
             x2 = str(lst[2])
             x3 = str(lst[3])
             lst.pop(1)
@@ -267,33 +405,33 @@ async def on_message(ctx):
                   x2 = str(money)
                   if money >= int(x2) and int(x2)>0:
                     if bigbool == 1:
-                      data[user] = money + int(x2)
+                      data[userid] = money + int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：大\n'+user+' 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：大\n<@'+userid+'> 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                     elif bigbool == 0:
-                      data[user] = money - int(x2)
+                      data[userid] = money - int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：小\n'+user+' 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：小\n<@'+userid+'> 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                   else:
                     await ctx.reply('你不能賭這個金額')
                 else:                
                   if money >= int(x2) and int(x2)>0:
                     if bigbool == 1:
-                      data[user] = money + int(x2)
+                      data[userid] = money + int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：大\n'+user+' 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：大\n<@'+userid+'> 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                     elif bigbool == 0:
-                      data[user] = money - int(x2)
+                      data[userid] = money - int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：小\n'+user+' 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：小\n<@'+userid+'> 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                   else:
                     await ctx.reply('你不能賭這個金額')
               elif x3 == 'small' or x3 == '小':
@@ -301,33 +439,33 @@ async def on_message(ctx):
                   x2 = str(money)
                   if money >= int(x2) and int(x2)>0:
                     if bigbool == 1:
-                      data[user] = money - int(x2)
+                      data[userid] = money - int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：大\n'+user+' 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：大\n<@'+userid+'> 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                     elif bigbool == 0:
-                      data[user] = money + int(x2)
+                      data[userid] = money + int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：小\n'+user+' 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：小\n<@'+userid+'> 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                   else:
                     await ctx.reply('你不能賭這個金額')
                 else:
                   if money >= int(x2) and int(x2)>0:
                     if bigbool == 1:
-                      data[user] = money - int(x2)
+                      data[userid] = money - int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：大\n'+user+' 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：大\n<@'+userid+'> 輸掉了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                     elif bigbool == 0:
-                      data[user] = money + int(x2)
+                      data[userid] = money + int(x2)
                       with open('data.json', 'w', encoding='utf-8') as dj:
                         json.dump(data ,dj ,ensure_ascii=False)
                         dj.close()
-                      await ctx.reply('本局結果：小\n'+user+' 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[user]))
+                      await ctx.reply('本局結果：小\n<@'+userid+'> 贏得了 $'+str(x2)+'\n目前資產： $'+ str(data[userid]))
                   else:
                     await ctx.reply('你不能賭這個金額')
               else:
